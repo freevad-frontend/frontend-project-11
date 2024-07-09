@@ -1,11 +1,26 @@
-// @ts-check
+import * as yup from 'yup';
+import 'bootstrap';
 
-import Example from './Example.js';
-//import { form } from './index.js';
+const validate = () => {
+  const form = document.querySelector('.rss-form');
+  const urlInput = document.querySelector('#url-input');
+  const feedbackEl = document.querySelector('.feedback');
+  feedbackEl.textContent = 'test';
+  const urlSchema = yup.string().url('Invalid URL').required('URL is required');
 
-export default () => {
-  const element = document.getElementById('point');
-  const obj = new Example(element);
-  obj.init();
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const url = urlInput.value.trim();
+    feedbackEl.textContent = '';
+
+    urlSchema.validate(url)
+      .then((data1) => {
+        feedbackEl.textContent = data1.message;
+      })
+      .catch((error) => {
+        feedbackEl.textContent = error.message;
+      });
+  });
 };
-//export const urlInput = form.querySelector('#url-input');
+
+export default validate;
