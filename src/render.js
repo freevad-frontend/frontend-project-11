@@ -60,6 +60,21 @@ const render = (state) => {
   feedsCard.appendChild(feedsList);
   feedsContainer.appendChild(feedsCard);
 
+	const postsCard = document.createElement('div');
+  postsCard.classList.add('card', 'border-0');
+
+  const cardBodyPost = document.createElement('div');
+  cardBodyPost.classList.add('card-body');
+
+  const cardTitlePost = document.createElement('h2');
+  cardTitlePost.classList.add('card-title', 'h4');
+  cardTitlePost.textContent = 'Посты';
+
+  cardBodyPost.appendChild(cardTitlePost);
+	postsCard.appendChild(cardBodyPost);
+
+	postsContainer.appendChild(postsCard);
+	
   const postsList = document.createElement('ul');
   postsList.classList.add('list-group', 'border-0', 'rounded-0');
 
