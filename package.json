@@ -4,7 +4,8 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "test": "jest --colors"
+    "test": "jest --colors",
+    "build": "webpack --mode=production --node-env=production"
   },
   "repository": {
     "type": "git",
