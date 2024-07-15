@@ -8,6 +8,7 @@ export const state = {
     error: null,
     success: true,
   },
+  i18nextInstance: {},
 };
 
 export const watchedState = onChange(state, () => {
