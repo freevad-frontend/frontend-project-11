@@ -1,5 +1,6 @@
 import * as yup from 'yup';
 import 'bootstrap';
+import i18next from 'i18next';
 import { state, watchedState } from './view.js';
 import parseRss from './parserss.js';
 import ru from './ru.js';
@@ -8,9 +9,9 @@ const validate = (i18nextInstance) => {
   const form = document.querySelector('.rss-form');
   const urlInput = document.querySelector('#url-input');
 
-  const schema = yup.string().url(`${i18nInstance.t('errors.url.invalid')}`).required(`${i18nInstance.t('errors.url.required')}`);
+  const schema = yup.string().url(`${i18nextInstance.t('errors.url.invalid')}`).required(`${i18nextInstance.t('errors.url.required')}`);
 
-  const isDuplicate = (feeds, newUrl) => (feeds.some((feed) => feed.url === newUrl) ? Promise.reject(new Error(`${i18nInstance.t('errors.url.already_exists')}`)) : Promise.resolve(newUrl));
+  const isDuplicate = (feeds, newUrl) => (feeds.some((feed) => feed.url === newUrl) ? Promise.reject(new Error(`${i18nextInstance.t('errors.url.already_exists')}`)) : Promise.resolve(newUrl));
 
   const validateUrl = (url) => schema.validate(url)
     .then(() => url)
@@ -21,10 +22,10 @@ const validate = (i18nextInstance) => {
       if (response.ok || response.type === 'opaque') {
         return url;
       }
-      throw new Error(`${i18nInstance.t('errors.url.unavailable')}`);
+      throw new Error(`${i18nextInstance.t('errors.url.unavailable')}`);
     })
     .catch(() => {
-      throw new Error(`${i18nInstance.t('errors.url.unavailable')}`);
+      throw new Error(`${i18nextInstance.t('errors.url.unavailable')}`);
     });
 
   form.addEventListener('submit', (event) => {
@@ -32,16 +33,29 @@ const validate = (i18nextInstance) => {
 
     const url = urlInput.value.trim();
 
+    if (watchedState.form.isProcessing) {
+      return;
+    }
+    watchedState.form.isProcessing = true;
+
     validateUrl(url)
       .then((validatedUrl) => isDuplicate(state.feeds, validatedUrl))
       .then((validUniqueUrl) => checkUrlAccessibility(validUniqueUrl))
       .then((rssData) => parseRss(rssData))
       .then((rssParsed) => {
         const newFeed = rssParsed;
-        watchedState.feeds = [...state.feeds, newFeed];
+        const newState = {
+          feeds: [...state.feeds, newFeed],
+          form: {
+            valid: true,
+            error: null,
+            success: true,
+            isProcessing: false,
+          },
+        };
+        Object.assign(watchedState, newState);
         form.reset();
         urlInput.focus();
-        watchedState.form = { valid: true, error: null, success: true };
       })
       .catch((error) => {
         watchedState.form = { valid: false, error: error.message, success: false };
@@ -50,7 +64,7 @@ const validate = (i18nextInstance) => {
 };
 
 const runApp = () => {
-  const i18nextInstance = i18n.createInstance();
+  const i18nextInstance = i18next.createInstance();
 
   i18nextInstance.init({
     lng: 'ru',
@@ -59,7 +73,7 @@ const runApp = () => {
       ru,
     },
   }).then(() => {
-    watchedState.i18nextInstance = i18nextInstance;
+    state.i18nextInstance = i18nextInstance;
     validate(i18nextInstance);
   }).catch((error) => {
     console.error(`Failed to initialize i18next instance: ${error}`);

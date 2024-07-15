@@ -1,21 +1,24 @@
 export default {
-    translation: {
-      errors: {
-        url: {
-            invalid: 'Неправильный URL',
-            required: 'URL обязателен',
-            already_exists: 'URL уже существует',
-            unavailable: 'URL недоступен',
-        }
+  translation: {
+    errors: {
+      url: {
+        invalid: 'Неправильный URL',
+        required: 'URL обязателен',
+        already_exists: 'URL уже существует',
+        unavailable: 'URL недоступен',
       },
       rss: {
-        loaded: 'RSS успешно загружен',
-        feeds: 'Фиды',
-        posts: 'Посты',
-      },
-      languages: {
-        en: 'English',
-        ru: 'Русский',
+        parsing: 'Ошибка парсинга RSS',
       },
     },
-  };
+    rss: {
+      loaded: 'RSS успешно загружен',
+      feeds: 'Фиды',
+      posts: 'Посты',
+    },
+    languages: {
+      en: 'English',
+      ru: 'Русский',
+    },
+  },
+};

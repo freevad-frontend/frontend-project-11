@@ -6,7 +6,8 @@ export const state = {
   form: {
     valid: true,
     error: null,
-    success: true,
+    success: false,
+    isProcessing: false,
   },
   i18nextInstance: {},
 };

@@ -1,26 +1,31 @@
-const parseRss = (url) => {
-  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+import { state } from './view.js';
 
-  return fetch(apiUrl)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Ошибка сети: ${response.statusText}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      if (data.status !== 'ok') {
-        throw new Error('Ошибка парсинга RSS');
-      }
-
-      const feed = data.feed.title;
-      const posts = data.items;
-      const rssParsed = { url, feed, posts };
-      return rssParsed;
-    })
-    .catch((error) => {
-      throw new Error(`Ошибка получения RSS: ${error.message}`);
-    });
+const parseXML = (xmlString, url) => {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
+  const parseError = xmlDoc.querySelector('parsererror');
+  if (parseError) {
+    throw new Error(`${state.i18nextInstance.t('errors.rss.parsing')}`);
+  }
+  const title = xmlDoc.querySelector('channel > title').textContent;
+  const description = xmlDoc.querySelector('channel > description').textContent;
+  const items = xmlDoc.querySelectorAll('item');
+  const posts = Array.from(items).map((item) => ({
+    title: item.querySelector('title').textContent,
+    link: item.querySelector('link').textContent,
+  }));
+  return {
+    url, title, description, posts,
+  };
 };
+
+const parseRss = (url) => fetch(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error(`${state.i18nextInstance.t('errors.url.unavailable')}`);
+    }
+    return response.json();
+  })
+  .then((data) => parseXML(data.contents, url));
 
 export default parseRss;

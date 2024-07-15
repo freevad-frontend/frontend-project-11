@@ -1,5 +1,3 @@
-import ru from './ru.js';
-
 const createCard = (title) => {
   const feedsCard = document.createElement('div');
   feedsCard.classList.add('card', 'border-0');
@@ -21,13 +19,13 @@ const createFeedList = (state) => {
   const feedsList = document.createElement('ul');
   feedsList.classList.add('list-group', 'border-0', 'rounded-0');
 
-  state.feeds.forEach(({ feed, description }) => {
+  state.feeds.forEach(({ title, description }) => {
     const listItem = document.createElement('li');
     listItem.classList.add('list-group-item', 'border-0', 'border-end-0');
 
     const feedTitle = document.createElement('h3');
     feedTitle.classList.add('h6', 'm-0');
-    feedTitle.textContent = feed;
+    feedTitle.textContent = title;
 
     const feedDescription = document.createElement('p');
     feedDescription.classList.add('m-0', 'small', 'text-black-50');
@@ -36,14 +34,12 @@ const createFeedList = (state) => {
     listItem.appendChild(feedTitle);
     listItem.appendChild(feedDescription);
     feedsList.appendChild(listItem);
-
-    return feedsList;
   });
+
+  return feedsList;
 };
 
-  feedsCard.appendChild(feedsList);
-  feedsContainer.appendChild(feedsCard);
-
+const createPostList = (state) => {
   const postsList = document.createElement('ul');
   postsList.classList.add('list-group', 'border-0', 'rounded-0');
 
@@ -80,7 +76,7 @@ const render = (state) => {
     feedbackEl.classList.remove('text-success');
     feedbackEl.classList.add('text-danger');
   } else if (state.form.success) {
-    feedbackEl.textContent = 'RSS успешно загружен';
+    feedbackEl.textContent = `${state.i18nextInstance.t('rss.loaded')}`;
     feedbackEl.classList.remove('text-danger');
     feedbackEl.classList.add('text-success');
   }
@@ -91,19 +87,19 @@ const render = (state) => {
   feedsContainer.innerHTML = '';
   postsContainer.innerHTML = '';
 
-  const feedsCard = createCard('Фиды');
+  if (state.feeds.length > 0) {
+    const feedsCard = createCard(`${state.i18nextInstance.t('rss.feeds')}`);
+    const feedsList = createFeedList(state);
 
-  const feedsList = createFeedList(state);
+    feedsCard.appendChild(feedsList);
+    feedsContainer.appendChild(feedsCard);
 
-  feedsCard.appendChild(feedsList);
-  feedsContainer.appendChild(feedsCard);
-  
-  const postsCard = createCard('Посты');
+    const postsCard = createCard(`${state.i18nextInstance.t('rss.posts')}`);
+    const postsList = createPostList(state);
 
-  const postsList = createPostList(state);
-
-  postsCard.appendChild(postsList);
-  postsContainer.appendChild(postsCard);
+    postsCard.appendChild(postsList);
+    postsContainer.appendChild(postsCard);
+  }
 };
 
 export default render;
