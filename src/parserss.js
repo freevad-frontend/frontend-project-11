@@ -1,4 +1,4 @@
-import { state } from './view.js';
+import { state, watchedState } from './view.js';
 
 const parseXML = (xmlString, url) => {
   const parser = new DOMParser();
@@ -29,13 +29,14 @@ export const parseRss = (url) => fetch(`https://allorigins.hexlet.app/get?disabl
   .then((data) => parseXML(data.contents, url));
 
 export const checkNewPosts = () => {
-  const fetchPromises = state.feeds.map((feed) => parseRss(feed.url)
+  const fetchPromises = watchedState.feeds.map((feed) => parseRss(feed.url)
     .then((rssData) => {
       const existingPostLinks = new Set(feed.posts.map((post) => post.link));
       const newPosts = rssData.posts.filter((post) => !existingPostLinks.has(post.link));
 
       if (newPosts.length > 0) {
-        feed.posts = [...feed.posts, ...newPosts];
+        const updatedFeed = { ...feed, posts: [...newPosts, ...feed.posts] };
+        Object.assign(feed, updatedFeed);
       }
     })
     .catch((error) => {
