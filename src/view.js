@@ -9,6 +9,7 @@ export const state = {
     success: false,
     isProcessing: false,
   },
+  readPosts: new Set(),
   i18nextInstance: {},
   isUpdating: false,
 };
