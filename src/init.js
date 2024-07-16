@@ -2,31 +2,51 @@ import * as yup from 'yup';
 import 'bootstrap';
 import i18next from 'i18next';
 import { state, watchedState } from './view.js';
-import parseRss from './parserss.js';
+import { parseRss, checkNewPosts } from './parserss.js';
 import ru from './ru.js';
+
+const validateUrl = (url, i18nextInstance) => {
+  const schema = yup.string().url(`${i18nextInstance.t('errors.url.invalid')}`).required(`${i18nextInstance.t('errors.url.required')}`);
+
+  return schema.validate(url)
+    .then(() => url)
+    .catch((error) => Promise.reject(error));
+};
+
+const isDuplicate = (feeds, newUrl, i18nextInstance) => (feeds.some((feed) => feed.url === newUrl) ? Promise.reject(new Error(`${i18nextInstance.t('errors.url.already_exists')}`)) : Promise.resolve(newUrl));
+
+const checkUrlAccessibility = (url, i18nextInstance) => fetch(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error(`${i18nextInstance.t('errors.url.unavailable')}`);
+    }
+    return url;
+  })
+  .catch(() => {
+    throw new Error(`${i18nextInstance.t('errors.url.unavailable')}`);
+  });
+
+const refreshStateWithNewRss = (newFeed) => {
+  const newState = {
+    feeds: [...state.feeds, newFeed],
+    form: {
+      valid: true,
+      error: null,
+      success: true,
+      isProcessing: false,
+    },
+  };
+  Object.assign(watchedState, newState);
+
+  if (!state.isUpdating) {
+    state.isUpdating = true;
+    checkNewPosts();
+  }
+};
 
 const validate = (i18nextInstance) => {
   const form = document.querySelector('.rss-form');
   const urlInput = document.querySelector('#url-input');
-
-  const schema = yup.string().url(`${i18nextInstance.t('errors.url.invalid')}`).required(`${i18nextInstance.t('errors.url.required')}`);
-
-  const isDuplicate = (feeds, newUrl) => (feeds.some((feed) => feed.url === newUrl) ? Promise.reject(new Error(`${i18nextInstance.t('errors.url.already_exists')}`)) : Promise.resolve(newUrl));
-
-  const validateUrl = (url) => schema.validate(url)
-    .then(() => url)
-    .catch((error) => Promise.reject(error));
-
-  const checkUrlAccessibility = (url) => fetch(url, { method: 'HEAD', mode: 'no-cors' })
-    .then((response) => {
-      if (response.ok || response.type === 'opaque') {
-        return url;
-      }
-      throw new Error(`${i18nextInstance.t('errors.url.unavailable')}`);
-    })
-    .catch(() => {
-      throw new Error(`${i18nextInstance.t('errors.url.unavailable')}`);
-    });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -38,22 +58,14 @@ const validate = (i18nextInstance) => {
     }
     watchedState.form.isProcessing = true;
 
-    validateUrl(url)
-      .then((validatedUrl) => isDuplicate(state.feeds, validatedUrl))
-      .then((validUniqueUrl) => checkUrlAccessibility(validUniqueUrl))
+    validateUrl(url, i18nextInstance)
+      .then((validatedUrl) => isDuplicate(state.feeds, validatedUrl, i18nextInstance))
+      .then((validUniqueUrl) => checkUrlAccessibility(validUniqueUrl, i18nextInstance))
       .then((rssData) => parseRss(rssData))
       .then((rssParsed) => {
         const newFeed = rssParsed;
-        const newState = {
-          feeds: [...state.feeds, newFeed],
-          form: {
-            valid: true,
-            error: null,
-            success: true,
-            isProcessing: false,
-          },
-        };
-        Object.assign(watchedState, newState);
+        refreshStateWithNewRss(newFeed);
+
         form.reset();
         urlInput.focus();
       })

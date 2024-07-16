@@ -19,7 +19,7 @@ const parseXML = (xmlString, url) => {
   };
 };
 
-const parseRss = (url) => fetch(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
+export const parseRss = (url) => fetch(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
   .then((response) => {
     if (!response.ok) {
       throw new Error(`${state.i18nextInstance.t('errors.url.unavailable')}`);
@@ -28,4 +28,27 @@ const parseRss = (url) => fetch(`https://allorigins.hexlet.app/get?disableCache=
   })
   .then((data) => parseXML(data.contents, url));
 
-export default parseRss;
+export const checkNewPosts = () => {
+  const fetchPromises = state.feeds.map((feed) => parseRss(feed.url)
+    .then((rssData) => {
+      const existingPostLinks = new Set(feed.posts.map((post) => post.link));
+      const newPosts = rssData.posts.filter((post) => !existingPostLinks.has(post.link));
+
+      if (newPosts.length > 0) {
+        feed.posts = [...feed.posts, ...newPosts];
+      }
+    })
+    .catch((error) => {
+      console.error(`Failed to fetch RSS feed: ${feed.url}. Error: ${error.message}`);
+    }));
+
+  Promise.all(fetchPromises).then(() => {
+    if (state.feeds.length > 0) {
+      setTimeout(() => {
+        checkNewPosts();
+      }, 5000);
+    } else {
+      state.isUpdating = false;
+    }
+  });
+};
