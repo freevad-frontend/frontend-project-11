@@ -21,6 +21,7 @@ export default {
     buttons: {
       read: 'Читать полностью',
       close: 'Закрыть',
+      view: 'Просмотр',
     },
     languages: {
       en: 'English',

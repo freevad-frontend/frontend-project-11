@@ -137,6 +137,19 @@ const createFeedList = (state) => {
   return feedsList;
 };
 
+const createLink = (state, item) => {
+  const postClass = state.readPosts.has(item.link) ? 'fw-normal' : 'fw-bold';
+
+  const link = document.createElement('a');
+  link.href = item.link;
+  link.textContent = item.title;
+  link.classList.add(postClass);
+  link.target = '_blank';
+  link.dataset.postId = item.link;
+
+  return link;
+};
+
 const createPostList = (state) => {
   const postsList = document.createElement('ul');
   postsList.classList.add('list-group', 'border-0', 'rounded-0');
@@ -145,17 +158,11 @@ const createPostList = (state) => {
     posts.forEach((item) => {
       const listItem = document.createElement('li');
       listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-      const postClass = state.readPosts.has(item.link) ? 'fw-normal' : 'fw-bold';
 
-      const link = document.createElement('a');
-      link.href = item.link;
-      link.textContent = item.title;
-      link.classList.add(postClass);
-      link.target = '_blank';
-      link.dataset.postId = item.link;
+      const link = createLink(state, item);
 
       const previewButton = document.createElement('button');
-      previewButton.textContent = 'Просмотр';
+      previewButton.textContent = state.i18nextInstance?.t('buttons.view');
       previewButton.classList.add('btn', 'btn-outline-primary', 'btn-sm');
       previewButton.dataset.id = item.link;
       previewButton.addEventListener('click', () => {
