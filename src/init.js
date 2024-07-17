@@ -88,7 +88,7 @@ const runApp = () => {
     state.i18nextInstance = i18nextInstance;
     validate(i18nextInstance);
   }).catch((error) => {
-    console.error(`Failed to initialize i18next instance: ${error}`);
+    console.error(`Ошибка инициализации i18next instance: ${error}`);
   });
 };
 

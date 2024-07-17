@@ -2,13 +2,15 @@ export default {
   translation: {
     errors: {
       url: {
-        invalid: 'Неправильный URL',
-        required: 'URL обязателен',
-        already_exists: 'URL уже существует',
+        invalid: 'Ссылка должна быть валидным URL',
+        required: 'Не должно быть пустым',
+        already_exists: 'RSS уже существует',
         unavailable: 'URL недоступен',
       },
       rss: {
         parsing: 'Ошибка парсинга RSS',
+        receipt: 'Ошибка получения RSS',
+        error: 'Ошибка',
       },
     },
     rss: {

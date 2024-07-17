@@ -40,7 +40,7 @@ export const checkNewPosts = () => {
       }
     })
     .catch((error) => {
-      console.error(`Failed to fetch RSS feed: ${feed.url}. Error: ${error.message}`);
+      console.error(`${state.i18nextInstance.t('errors.rss.receipt')}: ${feed.url}. ${state.i18nextInstance.t('errors.rss.error')}: ${error.message}`);
     }));
 
   Promise.all(fetchPromises).then(() => {
