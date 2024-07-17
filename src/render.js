@@ -1,6 +1,52 @@
 import * as bootstrap from 'bootstrap';
 
-const createModal = () => {
+const createModalButton = (text, classes, dataset, ariaLabel) => {
+  const modalButton = document.createElement('button');
+  modalButton.type = 'button';
+  modalButton.classList.add(...classes);
+  modalButton.dataset.bsDismiss = dataset;
+  modalButton.ariaLabel = ariaLabel;
+  modalButton.textContent = text;
+  return modalButton;
+};
+
+const createModalHeader = () => {
+  const modalHeader = document.createElement('div');
+  modalHeader.classList.add('modal-header', 'align-items-start');
+
+  const modalTitle = document.createElement('h5');
+  modalTitle.classList.add('modal-title');
+  modalTitle.id = 'postModalLabel';
+
+  const modalCloseButton = createModalButton('', ['btn-close'], 'modal', 'Close');
+
+  modalHeader.appendChild(modalTitle);
+  modalHeader.appendChild(modalCloseButton);
+
+  return modalHeader;
+};
+
+const createModalBody = () => {
+  const modalBody = document.createElement('div');
+  modalBody.classList.add('modal-body');
+
+  return modalBody;
+};
+
+const createModalFooter = (state) => {
+  const modalGoButton = createModalButton(state.i18nextInstance.t('buttons.read'), ['btn', 'btn-primary'], '', '');
+
+  const modalCloseButtonButtom = createModalButton(state.i18nextInstance.t('buttons.close'), ['btn', 'btn-secondary'], 'modal', '');
+
+  const modalFooter = document.createElement('div');
+  modalFooter.classList.add('modal-footer');
+  modalFooter.appendChild(modalGoButton);
+  modalFooter.appendChild(modalCloseButtonButtom);
+
+  return modalFooter;
+};
+
+const createModal = (state) => {
   const modal = document.createElement('div');
   modal.classList.add('modal', 'fade');
   modal.id = 'postModal';
@@ -11,48 +57,18 @@ const createModal = () => {
   modalDialog.classList.add('modal-dialog');
   modalDialog.role = 'document';
 
+  const modalHeader = createModalHeader();
+
+  const modalBody = createModalBody();
+
+  const modalFooter = createModalFooter(state);
+
   const modalContent = document.createElement('div');
   modalContent.classList.add('modal-content');
-
-  const modalHeader = document.createElement('div');
-  modalHeader.classList.add('modal-header');
-
-  const modalTitle = document.createElement('h5');
-  modalTitle.classList.add('modal-title');
-  modalTitle.id = 'postModalLabel';
-
-  const modalCloseButton = document.createElement('button');
-  modalCloseButton.type = 'button';
-  modalCloseButton.classList.add('btn-close');
-  modalCloseButton.dataset.bsDismiss = 'modal';
-  modalCloseButton.ariaLabel = 'Close';
-
-  modalHeader.appendChild(modalTitle);
-  modalHeader.appendChild(modalCloseButton);
-
-  const modalBody = document.createElement('div');
-  modalBody.classList.add('modal-body');
-
-  const modalGoButton = document.createElement('button');
-  modalGoButton.type = 'button';
-  modalGoButton.classList.add('btn');
-  modalGoButton.classList.add('btn-primary');
-  modalGoButton.textContent = 'Читать полностью';
-
-  const modalCloseButtonButtom = document.createElement('button');
-  modalCloseButtonButtom.type = 'button';
-  modalCloseButtonButtom.classList.add('btn');
-  modalCloseButtonButtom.classList.add('btn-secondary');
-  modalCloseButtonButtom.textContent = 'Закрыть';
-
-  const modalFooter = document.createElement('div');
-  modalFooter.classList.add('modal-footer');
-  modalFooter.appendChild(modalGoButton);
-  modalFooter.appendChild(modalCloseButtonButtom);
-
   modalContent.appendChild(modalHeader);
   modalContent.appendChild(modalBody);
   modalContent.appendChild(modalFooter);
+
   modalDialog.appendChild(modalContent);
   modal.appendChild(modalDialog);
 
@@ -61,15 +77,22 @@ const createModal = () => {
   return modal;
 };
 
-const showModal = (title, description) => {
+const showModal = (title, description, link) => {
   const modal = document.querySelector('#postModal');
   const modalTitle = modal.querySelector('.modal-title');
   const modalBody = modal.querySelector('.modal-body');
+  const modalGoButton = modal.querySelector('.btn-primary');
 
   modalTitle.textContent = title;
   modalBody.textContent = description;
 
   const bootstrapModal = new bootstrap.Modal(modal);
+
+  modalGoButton.onclick = () => {
+    window.open(link, '_blank');
+    bootstrapModal.hide();
+  };
+
   bootstrapModal.show();
 };
 
@@ -137,7 +160,7 @@ const createPostList = (state) => {
       previewButton.dataset.id = item.link;
       previewButton.addEventListener('click', () => {
         state.readPosts.add(item.link);
-        showModal(item.title, item.description);
+        showModal(item.title, item.description, link);
       });
 
       listItem.appendChild(link);
@@ -147,6 +170,22 @@ const createPostList = (state) => {
   });
 
   return postsList;
+};
+
+const createCardAndFeed = (state, feedsContainer, postsContainer) => {
+  const feedsCard = createCard(state.i18nextInstance?.t('rss.feeds') || 'Feeds');
+  const feedsList = createFeedList(state);
+
+  feedsCard.appendChild(feedsList);
+  feedsContainer.appendChild(feedsCard);
+
+  const modal = createModal(state);
+
+  const postsCard = createCard(state.i18nextInstance?.t('rss.posts') || 'Posts');
+  const postsList = createPostList(state, modal, state);
+
+  postsCard.appendChild(postsList);
+  postsContainer.appendChild(postsCard);
 };
 
 const render = (state) => {
@@ -164,7 +203,7 @@ const render = (state) => {
     feedbackEl.classList.remove('text-success');
     feedbackEl.classList.add('text-danger');
   } else if (state.form.success) {
-    feedbackEl.textContent = state.form.success;
+    feedbackEl.textContent = `${state.i18nextInstance.t('rss.loaded')}`;
     feedbackEl.classList.remove('text-danger');
     feedbackEl.classList.add('text-success');
   }
@@ -176,18 +215,7 @@ const render = (state) => {
   postsContainer.innerHTML = '';
 
   if (state.feeds.length > 0) {
-    const feedsCard = createCard(state.i18nextInstance?.t('rss.feeds') || 'Feeds');
-    const feedsList = createFeedList(state);
-
-    feedsCard.appendChild(feedsList);
-    feedsContainer.appendChild(feedsCard);
-
-    const postsCard = createCard(state.i18nextInstance?.t('rss.posts') || 'Posts');
-    const modal = createModal();
-    const postsList = createPostList(state, modal, state);
-
-    postsCard.appendChild(postsList);
-    postsContainer.appendChild(postsCard);
+    createCardAndFeed(state, feedsContainer, postsContainer);
   }
 };
 

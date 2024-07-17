@@ -16,6 +16,10 @@ export default {
       feeds: 'Фиды',
       posts: 'Посты',
     },
+    buttons: {
+      read: 'Читать полностью',
+      close: 'Закрыть',
+    },
     languages: {
       en: 'English',
       ru: 'Русский',
