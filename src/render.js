@@ -156,7 +156,7 @@ const createPostList = (state) => {
 
       const previewButton = document.createElement('button');
       previewButton.textContent = 'Просмотр';
-      previewButton.classList.add('btn', 'btn-primary', 'btn-sm');
+      previewButton.classList.add('btn', 'btn-outline-primary', 'btn-sm');
       previewButton.dataset.id = item.link;
       previewButton.addEventListener('click', () => {
         state.readPosts.add(item.link);
