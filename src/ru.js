@@ -8,7 +8,7 @@ export default {
         unavailable: 'URL недоступен',
       },
       rss: {
-        parsing: 'Ошибка парсинга RSS',
+        parsing: 'Ресурс не содержит валидный RSS',
         receipt: 'Ошибка получения RSS',
         error: 'Ошибка',
       },
