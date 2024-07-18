@@ -5,7 +5,7 @@ export default {
         invalid: 'Ссылка должна быть валидным URL',
         required: 'Не должно быть пустым',
         already_exists: 'RSS уже существует',
-        unavailable: 'URL недоступен',
+        unavailable: 'Ошибка сети',
       },
       rss: {
         parsing: 'Ресурс не содержит валидный RSS',
