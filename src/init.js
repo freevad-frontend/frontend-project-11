@@ -4,6 +4,8 @@ import i18next from 'i18next';
 import { state, watchedState } from './view.js';
 import { parseRss, checkNewPosts } from './parserss.js';
 import ru from './ru.js';
+import checkAndFetchUrl from './fetchurl.js';
+import createModal from './createmodal.js';
 
 const validateUrl = (url, i18nextInstance) => {
   const schema = yup.string().url(`${i18nextInstance.t('errors.url.invalid')}`).required(`${i18nextInstance.t('errors.url.required')}`);
@@ -14,17 +16,6 @@ const validateUrl = (url, i18nextInstance) => {
 };
 
 const isDuplicate = (feeds, newUrl, i18nextInstance) => (feeds.some((feed) => feed.url === newUrl) ? Promise.reject(new Error(`${i18nextInstance.t('errors.url.already_exists')}`)) : Promise.resolve(newUrl));
-
-const checkUrlAccessibility = (url, i18nextInstance) => fetch(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error(`${i18nextInstance.t('errors.url.unavailable')}`);
-    }
-    return url;
-  })
-  .catch(() => {
-    throw new Error(`${i18nextInstance.t('errors.url.unavailable')}`);
-  });
 
 const refreshStateWithNewRss = (newFeed) => {
   const newState = {
@@ -48,6 +39,8 @@ const validate = (i18nextInstance) => {
   const form = document.querySelector('.rss-form');
   const urlInput = document.querySelector('#url-input');
 
+  createModal(watchedState);
+
   form.addEventListener('submit', (event) => {
     event.preventDefault();
 
@@ -60,11 +53,10 @@ const validate = (i18nextInstance) => {
 
     validateUrl(url, i18nextInstance)
       .then((validatedUrl) => isDuplicate(state.feeds, validatedUrl, i18nextInstance))
-      .then((validUniqueUrl) => checkUrlAccessibility(validUniqueUrl, i18nextInstance))
-      .then((rssData) => parseRss(rssData))
+      .then((validUniqueUrl) => checkAndFetchUrl(validUniqueUrl, i18nextInstance))
+      .then((rssData) => parseRss(rssData.contents, url))
       .then((rssParsed) => {
-        const newFeed = rssParsed;
-        refreshStateWithNewRss(newFeed);
+        refreshStateWithNewRss(rssParsed);
 
         form.reset();
         urlInput.focus();

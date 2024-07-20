@@ -1,6 +1,7 @@
 import { state, watchedState } from './view.js';
+import checkAndFetchUrl from './fetchurl.js';
 
-const parseXML = (xmlString, url) => {
+export const parseRss = (xmlString, url) => {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
   const parseError = xmlDoc.querySelector('parsererror');
@@ -20,35 +21,31 @@ const parseXML = (xmlString, url) => {
   };
 };
 
-export const parseRss = (url) => fetch(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error(`${state.i18nextInstance.t('errors.url.unavailable')}`);
-    }
-    return response.json();
-  })
-  .then((data) => parseXML(data.contents, url));
+const timeIntervalUpdateRss = 5000;
 
 export const checkNewPosts = () => {
-  const fetchPromises = watchedState.feeds.map((feed) => parseRss(feed.url)
-    .then((rssData) => {
-      const existingPostLinks = new Set(feed.posts.map((post) => post.link));
-      const newPosts = rssData.posts.filter((post) => !existingPostLinks.has(post.link));
+  const fetchPromises = watchedState.feeds.map(
+    (feed) => checkAndFetchUrl(feed.url, state.i18nextInstance)
+      .then((rssData) => parseRss(rssData.contents, feed.url))
+      .then((rssParsed) => {
+        const existingPostLinks = new Set(feed.posts.map((post) => post.link));
+        const newPosts = rssParsed.posts.filter((post) => !existingPostLinks.has(post.link));
 
-      if (newPosts.length > 0) {
-        const updatedFeed = { ...feed, posts: [...newPosts, ...feed.posts] };
-        Object.assign(feed, updatedFeed);
-      }
-    })
-    .catch((error) => {
-      console.error(`${state.i18nextInstance.t('errors.rss.receipt')}: ${feed.url}. ${state.i18nextInstance.t('errors.rss.error')}: ${error.message}`);
-    }));
+        if (newPosts.length > 0) {
+          const updatedFeed = { ...feed, posts: [...newPosts, ...feed.posts] };
+          Object.assign(feed, updatedFeed);
+        }
+      })
+      .catch((error) => {
+        console.error(`${state.i18nextInstance.t('errors.rss.receipt')}: ${feed.url}. ${state.i18nextInstance.t('errors.rss.error')}: ${error.message}`);
+      }),
+  );
 
   Promise.all(fetchPromises).then(() => {
     if (state.feeds.length > 0) {
       setTimeout(() => {
         checkNewPosts();
-      }, 5000);
+      }, timeIntervalUpdateRss);
     } else {
       state.isUpdating = false;
     }

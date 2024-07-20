@@ -1,7 +1,7 @@
 {
   "name": "@hexlet/code",
   "version": "0.1.0",
-  "description": "",
+  "description": "rss aggregator",
   "type": "module",
   "scripts": {
     "test": "jest --colors",
@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/freevad-frontend/frontend-project-11.git"
   },
-  "author": "Kirill Mokevnin",
+  "author": "Vadim Semenov",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/freevad-frontend/frontend-project-11/issues"
@@ -32,7 +32,6 @@
     "babel-jest": "^29.3.1",
     "babel-loader": "^9.1.2",
     "css-loader": "^6.11.0",
-    "debug": "^4.3.4",
     "eslint": "^8.31.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-babel": "^5.3.1",
@@ -40,9 +39,6 @@
     "eslint-plugin-jest": "^27.2.1",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.6.0",
-    "jest": "^29.3.1",
-    "jest-cli": "^29.3.1",
-    "jest-environment-jsdom": "^29.3.1",
     "postcss-loader": "^7.3.4",
     "postcss-preset-env": "^7.8.3",
     "sass": "^1.77.6",
@@ -57,7 +53,6 @@
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "i18next": "^23.12.1",
-    "npm-check-updates": "^16.6.2",
     "on-change": "^5.0.1",
     "yup": "^1.4.0"
   }
