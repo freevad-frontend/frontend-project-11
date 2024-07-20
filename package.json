@@ -17,13 +17,6 @@
     "url": "https://github.com/freevad-frontend/frontend-project-11/issues"
   },
   "homepage": "https://github.com/freevad-frontend/frontend-project-11#readme",
-  "jest": {
-    "verbose": true,
-    "testEnvironmentOptions": {
-      "url": "http://localhost/"
-    },
-    "testEnvironment": "jsdom"
-  },
   "main": "src/init.js",
   "devDependencies": {
     "@babel/core": "^7.20.12",
