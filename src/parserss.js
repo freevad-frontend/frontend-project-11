@@ -1,4 +1,4 @@
-import { state, watchedState } from './view.js';
+import { watchedState } from './view.js';
 import checkAndFetchUrl from './fetchurl.js';
 
 export const parseRss = (xmlString, url) => {
@@ -6,7 +6,7 @@ export const parseRss = (xmlString, url) => {
   const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
   const parseError = xmlDoc.querySelector('parsererror');
   if (parseError) {
-    throw new Error(`${state.i18nextInstance.t('errors.rss.parsing')}`);
+    throw new Error(`${watchedState.i18nextInstance.t('errors.rss.parsing')}`);
   }
   const title = xmlDoc.querySelector('channel > title').textContent;
   const description = xmlDoc.querySelector('channel > description').textContent;
@@ -25,7 +25,7 @@ const timeIntervalUpdateRss = 5000;
 
 export const checkNewPosts = () => {
   const fetchPromises = watchedState.feeds.map(
-    (feed) => checkAndFetchUrl(feed.url, state.i18nextInstance)
+    (feed) => checkAndFetchUrl(feed.url, watchedState.i18nextInstance)
       .then((rssData) => parseRss(rssData.contents, feed.url))
       .then((rssParsed) => {
         const existingPostLinks = new Set(feed.posts.map((post) => post.link));
@@ -37,17 +37,17 @@ export const checkNewPosts = () => {
         }
       })
       .catch((error) => {
-        console.error(`${state.i18nextInstance.t('errors.rss.receipt')}: ${feed.url}. ${state.i18nextInstance.t('errors.rss.error')}: ${error.message}`);
+        console.error(`${watchedState.i18nextInstance.t('errors.rss.receipt')}: ${feed.url}. ${watchedState.i18nextInstance.t('errors.rss.error')}: ${error.message}`);
       }),
   );
 
   Promise.all(fetchPromises).then(() => {
-    if (state.feeds.length > 0) {
+    if (watchedState.feeds.length > 0) {
       setTimeout(() => {
         checkNewPosts();
       }, timeIntervalUpdateRss);
     } else {
-      state.isUpdating = false;
+      watchedState.isUpdating = false;
     }
   });
 };

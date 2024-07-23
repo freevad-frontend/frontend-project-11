@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 import 'bootstrap';
 import i18next from 'i18next';
-import { state, watchedState } from './view.js';
+import { watchedState } from './view.js';
 import { parseRss, checkNewPosts } from './parserss.js';
 import ru from './ru.js';
 import checkAndFetchUrl from './fetchurl.js';
@@ -19,7 +19,7 @@ const isDuplicate = (feeds, newUrl, i18nextInstance) => (feeds.some((feed) => fe
 
 const refreshStateWithNewRss = (newFeed) => {
   const newState = {
-    feeds: [...state.feeds, newFeed],
+    feeds: [...watchedState.feeds, newFeed],
     form: {
       valid: true,
       error: null,
@@ -29,8 +29,8 @@ const refreshStateWithNewRss = (newFeed) => {
   };
   Object.assign(watchedState, newState);
 
-  if (!state.isUpdating) {
-    state.isUpdating = true;
+  if (!watchedState.isUpdating) {
+    watchedState.isUpdating = true;
     checkNewPosts();
   }
 };
@@ -52,7 +52,7 @@ const validate = (i18nextInstance) => {
     watchedState.form.isProcessing = true;
 
     validateUrl(url, i18nextInstance)
-      .then((validatedUrl) => isDuplicate(state.feeds, validatedUrl, i18nextInstance))
+      .then((validatedUrl) => isDuplicate(watchedState.feeds, validatedUrl, i18nextInstance))
       .then((validUniqueUrl) => checkAndFetchUrl(validUniqueUrl, i18nextInstance))
       .then((rssData) => parseRss(rssData.contents, url))
       .then((rssParsed) => {
@@ -77,7 +77,7 @@ const runApp = () => {
       ru,
     },
   }).then(() => {
-    state.i18nextInstance = i18nextInstance;
+    watchedState.i18nextInstance = i18nextInstance;
     validate(i18nextInstance);
   }).catch((error) => {
     console.error(`Ошибка инициализации i18next instance: ${error}`);
